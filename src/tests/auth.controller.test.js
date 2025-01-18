@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { login, register } = require("../controllers/auth.controller");
+const { login, register } = require("../controller/auth.controller");
 const User = require("../models/user");
 
 // Mock the User model and JWT
