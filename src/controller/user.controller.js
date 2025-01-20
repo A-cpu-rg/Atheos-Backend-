@@ -22,7 +22,6 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ message: "Error fetching user" });
   }
 };
-
 // Update user
 exports.updateUser = async (req, res) => {
   try {

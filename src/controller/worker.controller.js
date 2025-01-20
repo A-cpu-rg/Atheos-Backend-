@@ -29,12 +29,12 @@ exports.getWorker = async (req, res) => {
 // Create worker
 exports.createWorker = async (req, res) => {
   try {
-    const { name, contactNumber, project, designation } = req.body;
+    const { name, contactNumber, project, role } = req.body;
     const worker = await Worker.create({
       name,
       contactNumber,
       project,
-      designation,
+      role,
     });
     res.status(201).json(worker);
   } catch (error) {
@@ -45,10 +45,10 @@ exports.createWorker = async (req, res) => {
 // Update worker
 exports.updateWorker = async (req, res) => {
   try {
-    const { name, contactNumber, designation, isActive } = req.body;
+    const { name, contactNumber, role, isActive } = req.body;
     const worker = await Worker.findByIdAndUpdate(
       req.params.id,
-      { name, contactNumber, designation, isActive },
+      { name, contactNumber, role, isActive },
       { new: true }
     );
 

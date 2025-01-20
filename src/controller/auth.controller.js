@@ -9,7 +9,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, username, name, role } = req.body;
+    const { email, password, username, name, role, department } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -27,7 +27,8 @@ exports.register = async (req, res) => {
       email,
       password, // Password will be hashed by the pre-save middleware
       username,
-      name,
+      name, // Ensure 'name' is passed
+      department, // Ensure 'department' is passed
       role,
     });
 
@@ -45,7 +46,8 @@ exports.register = async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
-        name: user.name,
+        name: user.name, // Correct field: 'name' should be returned here
+        department: user.department, // Correct field: 'department' should be returned here
         role: user.role,
       },
     });
@@ -92,6 +94,7 @@ exports.login = async (req, res) => {
         email: user.email,
         username: user.username,
         name: user.name,
+        department: user.department,
         role: user.role,
       },
     });
