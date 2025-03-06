@@ -136,7 +136,7 @@ router.get("/:id", authorize("topManagement", "middleManagement"), getUser);
 router.put("/:id", authorize("topManagement", "middleManagement"), updateUser);
 router.delete(
   "/:id",
-  authorize("topManagement", "middleManagement"),
+  // authorize("topManagement", "middleManagement"),
   deleteUser
 );
 

@@ -9,6 +9,7 @@ exports.getFeedback = async (req, res) => {
       .populate("responses.responder", "name role");
     res.json(feedback);
   } catch (error) {
+    // console.log(error)
     res.status(500).json({ message: "Error fetching feedback" });
   }
 };

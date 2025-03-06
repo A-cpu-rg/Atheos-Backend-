@@ -38,6 +38,7 @@ exports.createWorker = async (req, res) => {
     });
     res.status(201).json(worker);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: "Error creating worker" });
   }
 };

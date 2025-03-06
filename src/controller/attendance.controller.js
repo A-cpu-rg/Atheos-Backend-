@@ -4,10 +4,11 @@ const Attendance = require("../models/Attendance");
 exports.getAttendance = async (req, res) => {
   try {
     const attendance = await Attendance.find()
-      .populate("worker", "name")
-      .populate("project", "name");
+      // .populate("worker", "name")
+      // .populate("project", "name");
     res.json(attendance);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: "Error fetching attendance records" });
   }
 };

@@ -20,8 +20,8 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Fetch user from database using decoded token
-    req.user = await User.findById(decoded.id);
-
+    req.user = await User.findById(decoded.userId);
+    // console.log(decoded)
     if (!req.user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -35,11 +35,13 @@ exports.protect = async (req, res, next) => {
 
 exports.authorize = (...roles) => {
   return (req, res, next) => {
+    console.log(req , res, next)
     if (!req.user || !req.user.role) {
       return res.status(401).json({ message: "User role is missing" });
     }
 
     if (!roles.includes(req.user.role)) {
+      console.log(req.user.role)
       return res.status(403).json({
         message: `User role ${req.user.role} is not authorized to access this route`,
       });
