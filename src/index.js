@@ -9,7 +9,7 @@ require("dotenv").config();
 // Import routes
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
-const projectRoutes = require("./routes/project.routes");
+// const projectRoutes = require("./routes/project.routes");
 const workerRoutes = require("./routes/worker.routes");
 const attendanceRoutes = require("./routes/attendance.routes");
 const feedbackRoutes = require("./routes/feedback.routes");
@@ -48,7 +48,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/projects", projectRoutes);
+// app.use("/api/projects", projectRoutes);
 app.use("/api/workers", workerRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/feedback", feedbackRoutes);
