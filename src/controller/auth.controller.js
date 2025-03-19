@@ -11,7 +11,6 @@ exports.register = async (req, res) => {
 
     const { email, password, username, name, role, department } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
@@ -22,7 +21,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Create new user
     const user = new User({
       email,
       password, // Password will be hashed by the pre-save middleware

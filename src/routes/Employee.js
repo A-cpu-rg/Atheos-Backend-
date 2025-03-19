@@ -1,5 +1,6 @@
 const express = require("express")
 const router = express.Router()
+const { protect, authorize } = require("../middleware/auth.js");
 
 const EmployeeController = require("../controller/Employee")
 
@@ -7,28 +8,151 @@ const multer = require("multer")
 const fs = require("fs")
 const path = require("path") 
 
-const storeDir = path.join(__dirname  ,"../Public/Employee");
+// Create separate directories for profile photos and documents
+const employeeDir = path.join(__dirname, "../Public/Employee");
+const documentsDir = path.join(__dirname, "../Public/Employee/Documents");
 
-if(!fs.existsSync(storeDir)){
-    fs.mkdirSync(storeDir , {recursive : true})
-}
+// Create directories if they don't exist
+[employeeDir, documentsDir].forEach(dir => {
+    if(!fs.existsSync(dir)){
+        fs.mkdirSync(dir, {recursive: true})
+    }
+});
 
-var storage = multer .diskStorage({
-    destination : function(req,file , cb ){
-        if(!fs.existsSync(storeDir)){
-            fs.mkdirSync(storeDir ,{recursive : true})
+// Configure storage with separate destinations
+var storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        if(file.fieldname === "ProfilePhoto"){
+            cb(null, employeeDir);
+        } else if(file.fieldname === "Documents") {
+            cb(null, documentsDir);
         }
-        cb (null , storeDir);
     },
-    filename : function(req, file , cb){
-        cb(null , Date.now() + path.extname(file.originalname));
+    filename: function(req, file, cb){
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     },
 });
 
-const upload = multer({storage: storage})
+// File filter to validate file types
+const fileFilter = (req, file, cb) => {
+    if(file.fieldname === "ProfilePhoto") {
+        // For profile photos, only accept images
+        if(file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed for profile photo!'), false);
+        }
+    } else if(file.fieldname === "Documents") {
+        // For documents, accept common document formats
+        const allowedTypes = [
+            'image/jpeg', 'image/png', 'application/pdf', 
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        if(allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid document format! Only images, PDFs, and Word documents are allowed.'), false);
+        }
+    } else {
+        cb(new Error('Unexpected field'), false);
+    }
+};
 
-router.delete("/Employee/:id",EmployeeController.deleteEmployee)
-router.put("/Employee/:id",upload.single("ProfilePhoto"),EmployeeController.updateEmployee)
-router.get("/getEmployee",EmployeeController.getEmployee)
-router.post("/addEmployee",upload.single("ProfilePhoto"),EmployeeController.addEmployee)
-module.exports=router
+// Configure upload with fields
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+});
+
+// Configure upload fields
+const uploadFields = upload.fields([
+    { name: 'ProfilePhoto', maxCount: 1 },
+    { name: 'Documents', maxCount: 10 }
+]);
+
+// Error handling middleware for multer
+const handleUploadError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ error: 'File size is too large. Maximum size is 5MB.' });
+        }
+        return res.status(400).json({ error: err.message });
+    } else if (err) {
+        return res.status(400).json({ error: err.message });
+    }
+    next();
+};
+
+// Configure routes with static file serving
+router.use('/employee-uploads', express.static(employeeDir));
+router.use('/employee-documents', express.static(documentsDir));
+
+// Public routes - no authentication required
+router.post("/employeelogin", EmployeeController.loginEmployee);
+
+// Add a specific route for employee login at /api/admin/login path
+router.post("", EmployeeController.loginEmployee); // This will match /api/admin/login when mounted at /api/admin
+
+// Route to create a test employee with known credentials
+// router.post("/test-employee", EmployeeController.createTestEmployee);
+
+// Admin routes - requires authentication and admin authorization
+router.post("/addEmployee", 
+    protect, 
+    authorize("admin", "siteManager", "topManagement","middleManagement"), 
+    uploadFields,
+    handleUploadError,
+    EmployeeController.addEmployee
+);
+
+router.get("/getEmployee", 
+    protect, 
+    authorize("admin", "siteManager", "topManagement","middleManagement","client"), 
+    EmployeeController.getEmployee
+);
+
+router.get("/Employee/:id", 
+    protect, 
+    EmployeeController.getEmployeeById
+);
+
+router.put("/Employee/:id", 
+    protect, 
+    authorize("admin", "topManagement","middleManagement"),
+    uploadFields,
+    handleUploadError,
+    EmployeeController.updateEmployee
+);
+
+router.delete("/Employee/:id", 
+    protect, 
+    authorize("admin", "topManagement","middleManagement"),
+    EmployeeController.deleteEmployee
+);
+
+// Document deletion route
+router.delete("/Employee/:id/document/:documentName", 
+    protect, 
+    authorize("admin", "topManagement","middleManagement"),
+    EmployeeController.deleteDocument
+);
+
+// Store manager routes
+router.get("/store/:storeId/employees", 
+    protect, 
+    authorize("admin", "siteManager", "topManagement","middleManagement"),
+    EmployeeController.getEmployeesByStore
+);
+
+// Hub manager routes
+router.get("/hub/:hubId/employees", 
+    protect, 
+    authorize("admin", "siteManager", "topManagement","middleManagement"),
+    EmployeeController.getEmployeesByHub
+);
+
+module.exports = router

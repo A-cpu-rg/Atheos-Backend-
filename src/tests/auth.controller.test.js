@@ -43,7 +43,7 @@ describe("Auth Controller", () => {
       await login(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
-        token: "fake-token",
+        token: "tokenfake-",
         user: {
           id: "123",
           name: "Test User",

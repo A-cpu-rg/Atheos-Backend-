@@ -8,12 +8,11 @@ const DesignationSchema =new mongoose.Schema(
         Description:{
             type : String,
         },
-        // Department:{
-        //     type:String,
-        // },
-        // Level:{
-        //     type:String,
-        // },
+        Department:{
+            type:String,
+        },
+    
+        
     },
     { timestamps: true }
 )

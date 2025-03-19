@@ -3,9 +3,9 @@ const DesignationModel = require('../models/Designation');
 class Designation {
     async addDesignation(req, res) {
         try {
-            const { Designation, Description} = req.body;
+            const { Designation, Description , Department} = req.body;
             const newDesignation = await DesignationModel.create({
-                Designation, Description
+                Designation, Description , Department
             });
 
             if (newDesignation) {
@@ -34,10 +34,10 @@ class Designation {
     async updateDesignation(req, res) {
         try {
             const { id } = req.params;
-            const { Designation, Description } = req.body;
+            const { Designation, Description , Department} = req.body;
             const updatedDesignation = await DesignationModel.findByIdAndUpdate(
                 id,
-                { Designation, Description},
+                { Designation, Description, Department},
                 { new: true, runValidators: true }
             );
 

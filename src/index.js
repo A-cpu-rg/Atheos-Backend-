@@ -16,7 +16,7 @@ const feedbackRoutes = require("./routes/feedback.routes");
 const Hub = require('./routes/Hub')
 const Designation = require('./routes/Designation')
 const Store = require('./routes/Store')
-const StoreEm = require('./routes/StoreEm')
+// const StoreEm = require('./routes/StoreEm')
 const Employee = require('./routes/Employee')
 const WorkOrder = require('./routes/Workorder')
 const Complaint = require('./routes/Complaint')
@@ -55,7 +55,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin",Hub);
 app.use("/api/admin/",Designation);
 app.use("/api/admin",Store);
-app.use("/api/admin",StoreEm);
+// app.use("/api/admin",StoreEm);
 app.use("/api/admin",Employee)
 app.use("/api/Workorder",WorkOrder)
 app.use("/api/Complaint" ,Complaint)
