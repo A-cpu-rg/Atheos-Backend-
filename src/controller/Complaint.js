@@ -181,7 +181,7 @@ class Complaint {
             }
         } catch (error) {
             console.error("Add Complaint Error:", error);
-            return res.status(500).json({ error: "Internal server error" });
+            return res.status(500).json({ error: "Internal server error",message:error.message });
         }
     }
 

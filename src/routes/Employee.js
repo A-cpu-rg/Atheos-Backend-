@@ -111,7 +111,7 @@ router.post("/addEmployee",
 
 router.get("/getEmployee", 
     protect, 
-    authorize("admin", "siteManager", "topManagement","middleManagement","client"), 
+    authorize("admin", "siteManager", "topManagement","middleManagement","client","assistantManager"), 
     EmployeeController.getEmployee
 );
 

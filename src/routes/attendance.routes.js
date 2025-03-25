@@ -10,8 +10,12 @@ router.get("/", protect, authorize("admin", "siteManager", "assistantManager","c
 router.get("/date/:date", protect, AttendanceController.getAttendanceByDate);
 router.get("/public/date/:date", AttendanceController.getAttendanceByDate);
 
-// Mark attendance - only admin and store managers can do this
-router.post("/", protect, authorize("admin", "siteManager","middleManagement"), AttendanceController.markAttendance);
+// Mark attendance - accessible by site managers and above
+router.post("/",
+    protect,
+    authorize("admin", "siteManager", "topManagement"),
+    AttendanceController.markAttendance
+);
 
 // Update attendance - add this route for admin and top management
 router.put("/:id", protect, authorize("admin", "topManagement", "siteManager","middleManagement"), AttendanceController.updateAttendance);

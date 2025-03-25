@@ -5,8 +5,8 @@ const conversationSchema = new mongoose.Schema({
     author: String,
     authorRole: {
         type: String,
-        enum: ['Client', 'siteManager', 'assistantManager', 'middleManagement', 'topManagement'],
-        default: 'Client'
+        enum: ['client', 'siteManager', 'assistantManager', 'middleManagement', 'topManagement'],
+        default: 'client'
     },
     createdAt: {
         type: Date,
@@ -46,8 +46,8 @@ const ComplaintSchema = new mongoose.Schema(
         },
         authorRole: {
             type: String,
-            enum: ['Client', 'siteManager', 'assistantManager', 'middleManagement', 'topManagement'],
-            default: 'Client'
+            enum: ['client', 'siteManager', 'assistantManager', 'middleManagement', 'topManagement'],
+            default: 'client'
         },
         status: {
             type: String,
