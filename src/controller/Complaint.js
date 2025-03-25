@@ -6,27 +6,16 @@ class Complaint {
     // Get all complaints
     async getComplaint(req, res) {
         try {
-            let query = {};
+            // Remove role-based filtering - show all complaints to everyone
+            const query = {};
             
-            // Filter by user role and access
-            if (req.user) {
-                if (req.user.Role === 'client') {
-                    // Clients can only see complaints related to their stores
-                    query.store = { $in: req.user.Stores };
-                } else if (req.user.Role === 'siteManager') {
-                    // Site managers can only see complaints for their assigned store
-                    query.store = req.user.AssignedStore;
-                } else if (req.user.Role === 'assistantManager') {
-                    // Assistant managers can see complaints for stores they manage
-                    // This would require a lookup of stores the assistant manager is responsible for
-                    // For now, we'll use the AssignedStore field, but this might need to be extended
-                    query.store = req.user.AssignedStore;
-                }
-                // Middle and top management can see all complaints (no filter)
-            }
+            console.log('User Role:', req.user.Role);
+            console.log('Query:', JSON.stringify(query));
             
             const complaints = await ComplaintModel.find(query)
                 .sort({ createdAt: -1 });
+
+            console.log('Found complaints:', complaints.length);
 
             if (complaints) {
                 // Transform data for web interface with names and IDs
@@ -40,50 +29,32 @@ class Complaint {
                     category: complaint.category,
                     currentLevel: complaint.currentLevel,
                     createdBy: complaint.author,
-                    createdAt: new Date(complaint.createdAt).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    lastResponseAt: new Date(complaint.lastResponseAt).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
+                    createdAt: new Date(complaint.createdAt).toLocaleString(),
+                    lastResponseAt: new Date(complaint.lastResponseAt).toLocaleString(),
                     responses: complaint.conversations.map(conv => ({
                         message: conv.text,
                         user: conv.author,
-                        timestamp: new Date(conv.createdAt).toLocaleString('en-US', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }),
+                        timestamp: new Date(conv.createdAt).toLocaleString(),
                         role: conv.authorRole,
                         satisfactionResponse: conv.satisfactionResponse
                     })),
                     resolutionSatisfaction: complaint.resolutionSatisfaction,
                     mood: complaint.mood,
                     assignedTo: complaint.assignedTo || 'Unassigned',
-                    key: complaint._id.toString() // Add key for antd Table
+                    key: complaint._id.toString()
                 }));
 
-                return res.status(200).json({ 
+                return res.status(200).json({
                     success: true,
                     complaints: transformedComplaints,
-                    COM: complaints  // Original format for app compatibility
+                    COM: complaints
                 });
             } else {
                 return res.status(400).json({ error: "No complaints found" });
             }
         } catch (error) {
-            console.error("Get Complaints Error:", error);
-            return res.status(500).json({ error: "Internal Server error" });
+            console.error("Error fetching complaints:", error);
+            return res.status(500).json({ error: "Internal server error" });
         }
     }
 
