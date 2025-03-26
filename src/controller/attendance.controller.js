@@ -2,7 +2,6 @@ const Attendance = require("../models/Attendance");
 const Store = require("../models/Store");
 const Employee = require("../models/Employee");
 const Client = require("../models/Client");
-const mongoose = require("mongoose");
 
 class AttendanceController {
     async getAttendance(req, res) {
@@ -60,54 +59,29 @@ class AttendanceController {
                 });
             }
             
-            // Determine the store code - try multiple sources
-            let finalStoreCode = null;
+            // Use storeCode from the body, or get from the store name, or get from user's assigned store
+            let finalStoreCode = storeCode;
             
-            // Priority 1: Use storeCode from request body
-            if (storeCode) {
-                finalStoreCode = storeCode;
-                console.log(`Using storeCode from request body: ${finalStoreCode}`);
-            }
-            // Priority 2: Try to find store from the store field
-            else if (store) {
-                // If store looks like an ObjectId, it might be a store ID
-                if (mongoose.Types.ObjectId.isValid(store)) {
-                    // Try to find the store by ID
-                    const storeById = await Store.findById(store);
-                    if (storeById) {
-                        finalStoreCode = storeById.StoreCode;
-                        console.log(`Found store code ${finalStoreCode} from store ID ${store}`);
-                    }
-                }
-                
-                // If not found by ID, try by name or code
-                if (!finalStoreCode) {
-                    const storeObj = await Store.findOne({ 
-                        $or: [
-                            { StoreName: store },
-                            { StoreCode: store }
-                        ]
-                    });
-                    if (storeObj) {
-                        finalStoreCode = storeObj.StoreCode;
-                        console.log(`Found store code ${finalStoreCode} from store name/code ${store}`);
-                    }
+            if (!finalStoreCode && store) {
+                // Try to find store by name
+                const storeObj = await Store.findOne({ 
+                    $or: [
+                        { StoreName: store },
+                        { StoreCode: store }
+                    ]
+                });
+                if (storeObj) {
+                    finalStoreCode = storeObj.StoreCode;
+                    console.log(`Found store code ${finalStoreCode} from store name ${store}`);
                 }
             }
             
-            // Priority 3: Use the user's assigned store
             if (!finalStoreCode && req.user?.AssignedStore) {
                 finalStoreCode = req.user.AssignedStore;
                 console.log(`Using user's assigned store: ${finalStoreCode}`);
             }
             
-            // Priority 4: Check headers for store code
-            if (!finalStoreCode && req.headers['x-store-code']) {
-                finalStoreCode = req.headers['x-store-code'];
-                console.log(`Using store code from header: ${finalStoreCode}`);
-            }
-            
-            // Priority 5: Try to find the employee's assigned store
+            // If still no store code, try to find the employee's assigned store
             if (!finalStoreCode) {
                 const employee = await Employee.findById(finalEmployeeId);
                 if (employee && employee.AssignedStore) {
@@ -119,7 +93,7 @@ class AttendanceController {
             if (!finalStoreCode) {
                 return res.status(400).json({ 
                     success: false,
-                    message: "Store code is required and could not be determined" 
+                    message: "Store code is required" 
                 });
             }
             
@@ -137,24 +111,19 @@ class AttendanceController {
                 });
             }
 
-            // Fetch store by store code
-            const storeObj = await Store.findOne({ StoreCode: finalStoreCode });
+            // Verify store exists with the final store code
+            const storeObj = await Store.findOne({ 
+                $or: [
+                    { StoreCode: finalStoreCode },
+                    { _id: finalStoreCode }
+                ]
+            });
             
             if (!storeObj) {
-                // Try one more time with case-insensitive search
-                const storeByInsensitiveCode = await Store.findOne({
-                    StoreCode: { $regex: new RegExp('^' + finalStoreCode + '$', 'i') }
+                return res.status(404).json({ 
+                    success: false,
+                    message: `Store not found with code: ${finalStoreCode}` 
                 });
-                
-                if (!storeByInsensitiveCode) {
-                    return res.status(404).json({ 
-                        success: false,
-                        message: `Store not found with code: ${finalStoreCode}` 
-                    });
-                }
-                
-                // Use the found store
-                storeObj = storeByInsensitiveCode;
             }
 
             console.log(`Using store: ${storeObj.StoreName} (${storeObj.StoreCode})`);
@@ -176,10 +145,9 @@ class AttendanceController {
                 // For site managers, check if they're assigned to this store
                 const managerStore = req.user.AssignedStore;
                 
-                // Check if the manager's store matches the target store (case-insensitive)
-                const storeMatches = 
-                    managerStore && storeObj.StoreCode && 
-                    managerStore.toLowerCase() === storeObj.StoreCode.toLowerCase();
+                // Check various formats of store code matching
+                const storeMatches = managerStore === storeObj.StoreCode || 
+                                    managerStore === storeObj._id.toString();
                                     
                 if (!storeMatches) {
                     console.log(`Site manager not authorized: manager store ${managerStore} doesn't match ${storeObj.StoreCode}`);
@@ -226,7 +194,7 @@ class AttendanceController {
                 });
             }
 
-            // Create new attendance record with the store code (not the ID)
+            // Create new attendance record with the final store code
             const attendance = new Attendance({
                 employeeId: finalEmployeeId,
                 store: storeObj.StoreCode, // Always use the store code, not ID
