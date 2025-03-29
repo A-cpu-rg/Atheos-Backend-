@@ -314,7 +314,7 @@ class AttendanceController {
                 });
             }
 
-            // Calculate stats from attendance records
+            // Calculate stats from attendance 
             const stats = {
                 total: attendance.length,
                 present: attendance.filter(a => a.status === 'present').length,
