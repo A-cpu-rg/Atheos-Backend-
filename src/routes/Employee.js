@@ -101,14 +101,28 @@ router.post("", EmployeeController.loginEmployee); // This will match /api/admin
 // router.post("/test-employee", EmployeeController.createTestEmployee);
 
 // Admin routes - requires authentication and admin authorization
+// router.post("/addEmployee", 
+//     protect, 
+//     authorize("admin", "siteManager", "topManagement","middleManagement"), 
+//     uploadFields,
+//     handleUploadError,
+//     EmployeeController.addEmployee
+// );
+// In your employee routes file
 router.post("/addEmployee", 
     protect, 
     authorize("admin", "siteManager", "topManagement","middleManagement"), 
+    (req, res, next) => {
+        // Force Pending status for site managers
+        if (req.user && req.user.role === 'siteManager') {
+            req.body.Status = "Pending";
+        }
+        next();
+    },
     uploadFields,
     handleUploadError,
     EmployeeController.addEmployee
 );
-
 router.get("/getEmployee", 
     protect, 
     authorize("admin", "siteManager", "topManagement","middleManagement","client","assistantManager"), 

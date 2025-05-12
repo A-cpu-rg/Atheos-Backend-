@@ -39,6 +39,12 @@ class Employee {
                 return res.status(400).json({ error: "Email already exists" });
             }
             
+            // Determine status based on who's creating the employee
+            let finalStatus = Status || "Active";
+            if (req.user && req.user.role === 'siteManager') {
+                finalStatus = "Pending"; // Site managers' additions always need approval
+            }
+            
             // Handle profile photo with proper error checking
             let ProfilePhoto = null;
             if (req.files && req.files.ProfilePhoto && req.files.ProfilePhoto.length > 0) {
@@ -87,7 +93,7 @@ class Employee {
                 IFSCCode, 
                 BankName, 
                 Branch,
-                Status: Status || "Active",
+                Status: finalStatus,
                 Documents
             });
             
