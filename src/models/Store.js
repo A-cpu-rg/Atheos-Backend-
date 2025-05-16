@@ -41,14 +41,13 @@ const StoreSchema = new mongoose.Schema(
 
         PhoneNumber: {
             type: String,
-            required: true,
+            // required: true,
             unique: true,
             match: [/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"],
         },
 
         Email: {
             type: String,
-            unique: true,
         },
         Password:{
             type:String,
