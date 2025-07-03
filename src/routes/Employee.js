@@ -6,7 +6,7 @@ const EmployeeController = require("../controller/Employee")
 
 const multer = require("multer")
 const fs = require("fs")
-const path = require("path") 
+const path = require("path")
 
 // Create separate directories for profile photos and documents
 const employeeDir = path.join(__dirname, "../Public/Employee");
@@ -14,21 +14,21 @@ const documentsDir = path.join(__dirname, "../Public/Employee/Documents");
 
 // Create directories if they don't exist
 [employeeDir, documentsDir].forEach(dir => {
-    if(!fs.existsSync(dir)){
-        fs.mkdirSync(dir, {recursive: true})
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
     }
 });
 
 // Configure storage with separate destinations
 var storage = multer.diskStorage({
-    destination: function(req, file, cb){
-        if(file.fieldname === "ProfilePhoto"){
+    destination: function (req, file, cb) {
+        if (file.fieldname === "ProfilePhoto") {
             cb(null, employeeDir);
-        } else if(file.fieldname === "Documents") {
+        } else if (file.fieldname === "Documents") {
             cb(null, documentsDir);
         }
     },
-    filename: function(req, file, cb){
+    filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     },
@@ -36,20 +36,20 @@ var storage = multer.diskStorage({
 
 // File filter to validate file types
 const fileFilter = (req, file, cb) => {
-    if(file.fieldname === "ProfilePhoto") {
+    if (file.fieldname === "ProfilePhoto") {
         // For profile photos, only accept images
-        if(file.mimetype.startsWith('image/')) {
+        if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
             cb(new Error('Only image files are allowed for profile photo!'), false);
         }
-    } else if(file.fieldname === "Documents") {
+    } else if (file.fieldname === "Documents") {
         // For documents, accept common document formats
         const allowedTypes = [
-            'image/jpeg', 'image/png', 'application/pdf', 
+            'image/jpeg', 'image/png', 'application/pdf',
             'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
-        if(allowedTypes.includes(file.mimetype)) {
+        if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
             cb(new Error('Invalid document format! Only images, PDFs, and Word documents are allowed.'), false);
@@ -109,9 +109,9 @@ router.post("", EmployeeController.loginEmployee); // This will match /api/admin
 //     EmployeeController.addEmployee
 // );
 // In your employee routes file
-router.post("/addEmployee", 
-    protect, 
-    authorize("admin", "siteManager", "topManagement","middleManagement"), 
+router.post("/addEmployee",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "middleManagement", "permanentReliever", "assistantManager", "housekeeper", "FOE"),
     (req, res, next) => {
         // Force Pending status for site managers
         if (req.user && req.user.role === 'siteManager') {
@@ -123,50 +123,73 @@ router.post("/addEmployee",
     handleUploadError,
     EmployeeController.addEmployee
 );
-router.get("/getEmployee", 
-    protect, 
-    authorize("admin", "siteManager", "topManagement","middleManagement","client","assistantManager"), 
+router.get("/getEmployee",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "middleManagement", "client", "assistantManager", "permanentReliever", "assistantManager", "housekeeper", "employee", "FOE"),
     EmployeeController.getEmployee
 );
 
-router.get("/Employee/:id", 
-    protect, 
+router.get("/Employee/:id",
+    protect,
     EmployeeController.getEmployeeById
 );
 
-router.put("/Employee/:id", 
-    protect, 
-    authorize("admin", "topManagement","middleManagement"),
+router.put("/Employee/:id",
+    protect,
+    authorize("admin", "topManagement", "assistantManager", "siteManager", "FOE"),
     uploadFields,
     handleUploadError,
     EmployeeController.updateEmployee
 );
 
-router.delete("/Employee/:id", 
-    protect, 
-    authorize("admin", "topManagement","middleManagement"),
+router.delete("/Employee/:id",
+    protect,
+    authorize("admin", "topManagement", "assistantManager", "siteManager", "FOE"),
     EmployeeController.deleteEmployee
 );
 
 // Document deletion route
-router.delete("/Employee/:id/document/:documentName", 
-    protect, 
-    authorize("admin", "topManagement","middleManagement"),
+router.delete("/Employee/:id/document/:documentName",
+    protect,
+    authorize("admin", "topManagement", "assistantManager", "siteManager"),
     EmployeeController.deleteDocument
 );
 
 // Store manager routes
-router.get("/store/:storeId/employees", 
-    protect, 
-    authorize("admin", "siteManager", "topManagement","middleManagement"),
+router.get("/store/:storeId/employees",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "assistantManager"),
     EmployeeController.getEmployeesByStore
 );
 
 // Hub manager routes
-router.get("/hub/:hubId/employees", 
-    protect, 
-    authorize("admin", "siteManager", "topManagement","middleManagement"),
+router.get("/hub/:hubId/employees",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "assistantManager", "FOE"),
     EmployeeController.getEmployeesByHub
 );
+
+
+
+// New routes for separate file uploads
+router.post(
+    "/uploadProfilePhoto",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "assistantManager", "FOE"),
+    upload.single("ProfilePhoto"),
+    EmployeeController.uploadProfilePhoto,
+)
+router.post(
+    "/uploadDocument",
+    protect,
+    authorize("admin", "siteManager", "topManagement", "assistantManager", "FOE"),
+    upload.fields([{ name: "Documents", maxCount: 1 }]),
+    EmployeeController.uploadDocument,
+)
+router.post("/addEmployeeWithFiles", protect,
+    authorize("admin", "siteManager", "topManagement", "assistantManager", "FOE"), EmployeeController.addEmployeeWithFiles)
+
+
+
 
 module.exports = router

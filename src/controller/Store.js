@@ -19,7 +19,7 @@ class Store {
     async addStore(req, res) {
         try {
             console.log("test")
-            const { StoreName, Address, PhoneNumber, Email,Password, Country, State, District, City, Hub, Status } = req.body;
+            const { StoreName, Address, PhoneNumber, Email,Password, Country, State, District, City, Hub, Status,FOE } = req.body;
             let StorePhoto = req.file ? req.file.filename : null;
             const generateStoreCode = () => {
                 return 'AT-' + Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -38,7 +38,7 @@ class Store {
             }
     
             const newStore = await StoreModal.create({
-                StorePhoto, StoreName, StoreCode, Address, PhoneNumber, Email, Password,Country, State, District, City, Hub, Status
+                StorePhoto, StoreName, StoreCode, Address, PhoneNumber, Email, Password,Country, State, District, City, Hub, Status ,FOE
             });
     
             return res.status(201).json({ success: "Store added successfully", store: newStore });
@@ -54,11 +54,11 @@ class Store {
         try {
             const { id } = req.params;
             const {StorePhoto,StoreName,StoreCode,
-                Address, PhoneNumber, Email,Password,Country,State ,District,City,Hub,Status} = req.body
+                Address, PhoneNumber, Email,Password,Country,State ,District,City,Hub,Status,FOE} = req.body
             const updateStore = await StoreModal.findByIdAndUpdate(id,
                 {
                     StorePhoto,StoreName,StoreCode,
-                    Address, PhoneNumber, Email,Password,Country,State ,District,City,Hub,Status
+                    Address, PhoneNumber, Email,Password,Country,State ,District,City,Hub,Status,FOE
                 },
                 {
                     new :true , runValidators: true

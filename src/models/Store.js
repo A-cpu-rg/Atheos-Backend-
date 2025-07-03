@@ -79,6 +79,10 @@ const StoreSchema = new mongoose.Schema(
             enum: ["Active", "Inactive"],
             default: "Active",
         },
+        FOE:{
+            type:String,
+            reqiured:true
+        }
     },
     { timestamps: true }
     

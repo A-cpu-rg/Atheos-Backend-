@@ -37,13 +37,16 @@ const EmployeeSchema = new mongoose.Schema(
         },
         // Store code the employee is assigned to
         AssignedStore: {
-            type: String,
+            type: [String],
             ref: 'Store'
         },
         // Hub codes the employee is assigned to (multiple)
         AssignedHub: {
             type: [String],
             default: []
+        },
+        AssignedFOC: {
+            type: String,
         },
         JoinDate: {
             type: String
@@ -87,7 +90,7 @@ const EmployeeSchema = new mongoose.Schema(
         // System role based on designation
         Role: {
             type: String,
-            enum: ['siteManager', 'assistantManager', 'topManagement', 'middleManagement', 'employee'],
+            enum: ['siteManager', 'assistantManager', 'topManagement', 'middleManagement', 'employee','permanentReliever', 'RAC', 'ZHPL_MST', 'BCPL_MST','permanentreliever','housekeeper', 'FOE', 'FOC', 'foe','foc'],
             default: 'employee'
         },
         Documents: [{
@@ -95,21 +98,22 @@ const EmployeeSchema = new mongoose.Schema(
         }],
         Status: {
             type: String,
-            enum: ["Active", "Inactive","Pending","Rejected"],
+            enum: ["Active", "Inactive", "Pending", "Rejected"],
             default: "Active"
         },
         LastLogin: {
             type: Date
-        }
+        },
+
     }, { timestamps: true }
 )
 
 // Static method to generate employee code
-EmployeeSchema.statics.generateEmployeeCode = async function(department) {
+EmployeeSchema.statics.generateEmployeeCode = async function (department) {
     try {
         const prefix = 'EMP';
         const deptCode = department ? department.substring(0, 3).toUpperCase() : 'GEN';
-        
+
         // Find the last employee code for this department
         const lastEmployee = await this.findOne(
             { EmployeeCode: new RegExp(`^${prefix}-${deptCode}-`, 'i') },
@@ -135,7 +139,7 @@ EmployeeSchema.statics.generateEmployeeCode = async function(department) {
 };
 
 // Pre-save middleware
-EmployeeSchema.pre("save", async function(next) {
+EmployeeSchema.pre("save", async function (next) {
     try {
         // Generate employee code for new employees
         if (this.isNew && !this.EmployeeCode) {
@@ -170,9 +174,9 @@ EmployeeSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Method to set role based on designation
-EmployeeSchema.methods.setRoleFromDesignation = function() {
+EmployeeSchema.methods.setRoleFromDesignation = function () {
     const designation = this.Designation.toLowerCase();
-    
+
     if (designation.includes('site manager')) {
         this.Role = 'siteManager';
     } else if (designation.includes('assistant manager')) {
@@ -181,10 +185,28 @@ EmployeeSchema.methods.setRoleFromDesignation = function() {
         this.Role = 'topManagement';
     } else if (designation.includes('middle management') || designation.includes('manager')) {
         this.Role = 'middleManagement';
-    } else {
+    } else if (designation.includes('permanent reliever')) {
+        this.Role = 'permanentreliever';
+    } else if (designation.includes('RAC')) {
+        this.Role = 'RAC';
+    } else if (designation.includes('ZHPL_MST')) {
+        this.Role = 'ZHPL_MST';
+    } else if (designation.includes('BCPL_MST')) {
+        this.Role = 'BCPL_MST';
+    } else if (designation.includes('housekeeper')) {
+        this.Role = 'housekeeper';
+    } else if (designation.includes('FOE')) {
+        this.Role = 'FOE';
+    } else if (designation.includes('foe')) {
+        this.Role = 'FOE';
+    }
+
+    else {
         this.Role = 'employee';
     }
 };
+
+"User role permanentReliever is not authorized to access this route"
 
 const Employeemodel = mongoose.model("Employee", EmployeeSchema)
 module.exports = Employeemodel

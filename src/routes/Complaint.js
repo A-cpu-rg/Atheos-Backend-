@@ -6,26 +6,26 @@ const ComplaintController = require("../controller/Complaint");
 
 // Get all complaints - accessible based on user role filters
 router.get("/getallcomplaints", 
-    protect, authorize("middleManagement","client","siteManager","assistantManager","topManagement"),
+    protect, authorize("middleManagement","client","siteManager","assistantManager","topManagement","permanentReliever","housekeeper"),
     ComplaintController.getComplaint
 );
 
 // Create complaint - primarily for clients
 router.post("/", 
     protect, 
-    authorize("client","siteManager","assistantManager"), 
+    authorize("client","siteManager","assistantManager","housekeeper"), 
     ComplaintController.addComplaint
 );
 
 // Get a specific complaint
 router.get("/:id", 
-    protect,authorize("middleManagement","client","siteManager","assistantManager","topManagement"),
+    protect,authorize("middleManagement","client","siteManager","assistantManager","topManagement","permanentReliever","housekeeper"),
     ComplaintController.getComplaintById
 );
 
 // Add response to a complaint
 router.post("/:id/responses", 
-    protect,authorize("middleManagement","client","siteManager","assistantManager","topManagement"), 
+    protect,authorize("middleManagement","client","siteManager","assistantManager","topManagement","permanentReliever","housekeeper"), 
     ComplaintController.addResponse
 );
 
