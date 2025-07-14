@@ -14,6 +14,10 @@ const EmployeeSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+         FathersName: {
+            type: String,
+            // required: true
+        },
         Email: {
             type: String,
             required: true,

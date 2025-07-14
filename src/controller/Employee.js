@@ -16,7 +16,7 @@ class Employee {
                 return res.status(400).json({ error: "No employees found" });
             }
         } catch (error) {
-            console.error("Error fetching employees:", error);
+            console.error("Error fetching employees:", error.message);
             return res.status(500).json({ error: "Internal server error" });
         }
     }
@@ -246,6 +246,7 @@ class Employee {
 
       const {
         Name,
+        FathersName,
         Email,
         Password,
         PhoneNumber,
@@ -334,6 +335,7 @@ class Employee {
       const newEmployee = new Employeemodel({
         ProfilePhoto,
         Name,
+        FathersName,
         Email,
         Password: Password || "123456",
         PhoneNumber,
@@ -382,6 +384,7 @@ class Employee {
         message: "Employee added successfully",
         employee: {
           id: newEmployee._id,
+          FathersName: newEmployee.FathersName,
           EmployeeCode: newEmployee.EmployeeCode,
           Name: newEmployee.Name,
           Email: newEmployee.Email,
@@ -413,6 +416,7 @@ class Employee {
 
       const {
         Name,
+        FathersName,
         Email,
         Password,
         PhoneNumber,
@@ -487,6 +491,7 @@ class Employee {
       const newEmployee = new Employeemodel({
         ProfilePhoto,
         Name,
+        FathersName,
         Email,
         Password: Password || "123456",
         PhoneNumber,
@@ -533,6 +538,7 @@ class Employee {
         message: "Employee added successfully",
         employee: {
           id: newEmployee._id,
+          FathersName: newEmployee.FathersName,
           EmployeeCode: newEmployee.EmployeeCode,
           Name: newEmployee.Name,
           Email: newEmployee.Email,
@@ -579,7 +585,7 @@ class Employee {
                 Name, Email, PhoneNumber, Department, Designation, AssignedStore,
                 AssignedHub, JoinDate, Education, Address, Country, State, City, PinCode,
                 EmergencyContact, BloodGroup, AccountNumber, IFSCCode, BankName, Branch,
-                Password, Status, AssignedFOC
+                Password, Status, AssignedFOC ,FathersName
             } = req.body;
 
             console.log('Update request body:', req.body);
@@ -590,7 +596,7 @@ class Employee {
                 Name, Email, PhoneNumber, Department, Designation, AssignedStore,
                 JoinDate, Education, Address, Country, State, City, PinCode,
                 EmergencyContact, BloodGroup, AccountNumber, IFSCCode, BankName, Branch,
-                Status, AssignedFOC
+                Status, AssignedFOC ,FathersName
             };
 
             // Handle AssignedHub specially to support multiple values
