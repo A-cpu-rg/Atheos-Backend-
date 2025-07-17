@@ -255,6 +255,7 @@ class Employee {
         AssignedStore,
         AssignedHub,
         JoinDate,
+        DateOfBirth,
         Education,
         Address,
         Country,
@@ -344,6 +345,7 @@ class Employee {
         AssignedStore: processedAssignedStore,
         AssignedHub: processedAssignedHub,
         JoinDate,
+        DateOfBirth,
         Education,
         Address,
         Country,
@@ -385,6 +387,7 @@ class Employee {
         employee: {
           id: newEmployee._id,
           FathersName: newEmployee.FathersName,
+          DateOfBirth: newEmployee.DateOfBirth,
           EmployeeCode: newEmployee.EmployeeCode,
           Name: newEmployee.Name,
           Email: newEmployee.Email,
@@ -425,6 +428,7 @@ class Employee {
         AssignedStore,
         AssignedHub,
         JoinDate,
+        DateOfBirth,
         Education,
         Address,
         Country,
@@ -500,6 +504,7 @@ class Employee {
         AssignedStore: processedAssignedStore,
         AssignedHub: processedAssignedHub,
         JoinDate,
+        DateOfBirth,
         Education,
         Address,
         Country,
@@ -540,6 +545,7 @@ class Employee {
           id: newEmployee._id,
           FathersName: newEmployee.FathersName,
           EmployeeCode: newEmployee.EmployeeCode,
+          DateOfBirth: newEmployee.DateOfBirth,
           Name: newEmployee.Name,
           Email: newEmployee.Email,
           Designation: newEmployee.Designation,
@@ -585,7 +591,7 @@ class Employee {
                 Name, Email, PhoneNumber, Department, Designation, AssignedStore,
                 AssignedHub, JoinDate, Education, Address, Country, State, City, PinCode,
                 EmergencyContact, BloodGroup, AccountNumber, IFSCCode, BankName, Branch,
-                Password, Status, AssignedFOC ,FathersName
+                Password, Status, AssignedFOC ,FathersName,DateOfBirth
             } = req.body;
 
             console.log('Update request body:', req.body);
@@ -596,7 +602,7 @@ class Employee {
                 Name, Email, PhoneNumber, Department, Designation, AssignedStore,
                 JoinDate, Education, Address, Country, State, City, PinCode,
                 EmergencyContact, BloodGroup, AccountNumber, IFSCCode, BankName, Branch,
-                Status, AssignedFOC ,FathersName
+                Status, AssignedFOC ,FathersName ,DateOfBirth
             };
 
             // Handle AssignedHub specially to support multiple values

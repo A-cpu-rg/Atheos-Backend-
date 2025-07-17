@@ -55,6 +55,9 @@ const EmployeeSchema = new mongoose.Schema(
         JoinDate: {
             type: String
         },
+        DateOfBirth: {
+            type: String
+        },
         Education: {
             type: String
         },

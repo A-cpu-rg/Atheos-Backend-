@@ -21,6 +21,8 @@ const Employee = require('./routes/Employee')
 const WorkOrder = require('./routes/Workorder')
 const Complaint = require('./routes/Complaint')
 
+const AttendanceManager = require('./routes/attendanceManager.routes') 
+
 const Client = require("./routes/Client")
 const app = express();
 
@@ -39,6 +41,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const path = require("path");
+const Attendance = require("./models/Attendance");
 app.use(express.static(path.join(__dirname, "Public")));
  
 
@@ -60,6 +63,7 @@ app.use("/api/admin",Employee)
 app.use("/api/Workorder",WorkOrder)
 app.use("/api/Complaint" ,Complaint)
 app.use("/api/admin",Client)
+app.use("/api/attendance-manager",AttendanceManager)
 // app.use("/api/admin");
 
 
@@ -72,7 +76,7 @@ app.get("/", (req, res) => {
 const connectDB = async () => {
   try {
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGODB_URI); // Removed deprecated options
+      await mongoose.connect(process.env.MONGODB_URI); // Removed deprecated options
     console.log("MongoDB Connected Successfully");
 
     // Start server only after DB connection
